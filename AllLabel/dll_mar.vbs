@@ -1,0 +1,31 @@
+Dim Shell, strCommand, strHost, ReturnCode, oShell, objExec, objShell
+    strHost = "192.168.0.211" 
+    'Присваиваем переменной имя хоста
+Set Shell = wscript.createObject("wscript.shell") 
+'Создаем объект для выполнения запуска команды
+Set oShell = CreateObject("Shell.Application") 
+
+'Создаем объект для завершения процесса	
+Set objShell = CreateObject("WScript.Shell")
+Set objExec = objShell.Exec("\\192.168.0.211\froda\On_Eib_C\market005.exe -t -c\\192.168.0.211\froda\On_Eib_C\config.fpw") 
+'WshShell.Popup "Подождите, идет соединение с базой", 15, "Открытие 'Администратор маркетинга'", vbInformation
+Do While true 
+    if objExec.Status = 1  then
+	objShell.Run "taskkill.exe /f /im del_mar003*", 0
+	Wscript.Quit 1
+	 End if
+    'Запускаем выполнение скрипта по кругу
+     strCommand = "ping -n 4 -l 1 " & strHost 
+    'Присваиваем переменную отвечающую за пинг нашего хоста
+     ReturnCode = Shell.Run(strCommand, 0, True)
+    'Возвращаем код
+        If ReturnCode = 0 Then 
+            '0 - проверка работоспособности команды 1 - команда не выполняется
+            strCommand = true  
+        Else
+		oShell.ShellExecute "taskkill.exe", "/f /im del_mar003*", , , 0  
+		MsgBox  "ВНИМАНИЕ!!!"& chr(10) &"Обрыв сетевого соединения. Сеть более не доступна." & chr(10) & "Нажмите ОК, чтобы аварийно завершить программу.",65584
+		WScript.Quit()
+	 End if
+                    	
+Loop
